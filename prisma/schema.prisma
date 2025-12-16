@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  post      Post[]
+  comment   Comment[]
+  role      Role      @default(AUTHOR)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Role {
+  AUTHOR
+  ADMIN
+  MODERATOR
+}
+
+model Post {
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  content     String  @db.Text
+  isPublished Boolean @default(false)
+
+  // Metrics
+  views Int @default(0)
+
+  publishedAt DateTime?
+
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String
+  comment   Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([authorId])
+  @@index([isPublished])
+}
+
+model Comment {
+  id     String @id @default(cuid())
+  ost    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  isHidden  Boolean  @default(false)
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+}
