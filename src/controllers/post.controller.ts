@@ -86,7 +86,10 @@ export const updatePost: RequestHandler = async (req, res) => {
 
   const updated = await prisma.post.update({
     where: { id: post.id },
-    data: req.body,
+    data: {
+      title: value.title,
+      content: value.content,
+    },
   });
 
   return res.status(201).json(updated);
@@ -146,7 +149,7 @@ export const publishPost: RequestHandler = async (req, res) => {
     throw new AppError("Forbidden", "Forbidden", 403);
   }
 
-  const updated = await prisma.post.update({
+  await prisma.post.update({
     where: { id: post.id },
     data: {
       isPublished: true,

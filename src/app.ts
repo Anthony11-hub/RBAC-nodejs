@@ -8,6 +8,7 @@ import { utils } from "./utils";
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 import postsRouter from "./routes/post.router";
 import authRoutes from "./routes/auth.router";
+import userRoutes from "./routes/user.router";
 
 const app = express();
 
@@ -33,6 +34,8 @@ app.get(
 app.use("/api/v1/post", postsRouter);
 // auth
 app.use("/api/v1/auth", authRoutes);
+// user
+app.use("/api/v1/user", userRoutes);
 
 // errorHandler
 app.use(errorHandler as unknown as express.ErrorRequestHandler);

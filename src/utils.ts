@@ -138,7 +138,7 @@ const defineAbility = (user: { id: string; role: Role }) => {
     can("delete", "Post", { authorId: user.id }); // can delete their post
 
     can("create", "Comment");
-    can("update", "Comment");
+    can("update", "Comment", { authorId: user.id }); // can update own comment
     can("read", "Comment", { isHidden: false }); // can't see hidden comments
   }
 

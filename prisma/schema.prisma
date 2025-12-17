@@ -43,7 +43,7 @@ model Post {
 
   publishedAt DateTime?
 
-  author    User      @relation(fields: [authorId], references: [id])
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String
   comment   Comment[]
   createdAt DateTime  @default(now())
