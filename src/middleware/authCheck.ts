@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { AppError } from "../error/app.error";
 import jwt from "jsonwebtoken";
+import { Role } from "../generated/prisma/enums";
 
 const tokenSecret = process.env.JWT_SECRET;
 
@@ -13,22 +14,26 @@ if (!tokenSecret) {
 }
 
 export const authCheck: RequestHandler = (req, res, next) => {
-  const cookies = req.cookies;
+  const token = req.headers.authorization?.split(" ")[1];
 
-  if (!cookies?.jwt) {
-    throw new AppError("Unauthorized", "User not authorized", 401);
+  if (!token) {
+    throw new AppError("No token provided", "Unauthorized", 401);
   }
 
   try {
-    const decoded = jwt.verify(cookies.jwt, tokenSecret) as {
+    const decoded = jwt.verify(token, tokenSecret) as {
       userId: string;
+      role: Role;
     };
 
     if (!decoded.userId) {
       throw new AppError("Unauthorized", "Invalid or expired token.", 401);
     }
 
-    req.user.userId = decoded.userId;
+    req.user = {
+      userId: decoded.userId,
+      role: decoded.role,
+    };
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {

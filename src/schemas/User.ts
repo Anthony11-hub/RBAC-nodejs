@@ -9,12 +9,12 @@ export interface IUserDto {
 export const loginSchema = Joi.object({
   email: Joi.string().min(1).required().messages({
     "string.empty": "email is required",
-    "string.min": "email si required",
+    "string.min": "email is required",
     "any.required": "email is required",
   }),
   password: Joi.string().min(1).required().messages({
     "string.empty": "password is required",
-    "string.min": "password si required",
+    "string.min": "password is required",
     "any.required": "password is required",
   }),
 });
@@ -22,17 +22,17 @@ export const loginSchema = Joi.object({
 export const registerSchema = Joi.object({
   name: Joi.string().min(1).required().messages({
     "string.empty": "name is required",
-    "string.min": "name si required",
+    "string.min": "name is required",
     "any.required": "name is required",
   }),
   email: Joi.string().min(1).required().messages({
     "string.empty": "email is required",
-    "string.min": "email si required",
+    "string.min": "email is required",
     "any.required": "email is required",
   }),
   password: Joi.string().min(1).required().messages({
     "string.empty": "password is required",
-    "string.min": "password si required",
+    "string.min": "password is required",
     "any.required": "password is required",
   }),
 });

@@ -33,7 +33,6 @@ app.get(
 app.use("/api/v1/post", postsRouter);
 // auth
 app.use("/api/v1/auth", authRoutes);
-// user
 
 // errorHandler
 app.use(errorHandler as unknown as express.ErrorRequestHandler);

@@ -27,6 +27,24 @@ const logger = createLogger({
   ],
 });
 
+const generateSlug = async (value: string) => {
+  const baseSlug = value
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+
+  let slug = baseSlug;
+  let counter = 1;
+  while (await prisma.post.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  return slug;
+};
+
 const tryCatchBlock =
   (controller: RequestHandler): RequestHandler =>
   async (req, res, next) => {
@@ -48,10 +66,6 @@ const healthCheck = async (): Promise<void> => {
       500,
     );
   }
-};
-
-const getTime = (): number => {
-  return new Date().getTime();
 };
 
 const genSalt = (saltRounds: number, value: string): Promise<string> => {
@@ -96,6 +110,7 @@ export type AppAbility = PureAbility<
   PrismaQuery
 >;
 
+// abilities for all system users
 const defineAbility = (user: { id: string; role: Role }) => {
   const { can, cannot, build } = new AbilityBuilder<AppAbility>(
     createPrismaAbility,
@@ -108,19 +123,19 @@ const defineAbility = (user: { id: string; role: Role }) => {
   if (user.role === "MODERATOR") {
     can("read", "Post");
     can("publish", "Post");
-    can("update", "Post");
-    can("hide", "Comment"); // only moderator can hide comments
+    can("hide", "Comment"); // moderator can hide comments
     cannot("delete", "User");
   }
 
   if (user.role === "AUTHOR") {
-    can("read", "Post", { isPublshed: true });
+    can("read", "Post", { isPublished: true });
+    can("read", "Post", { isPublished: false, authorId: user.id }); // can read own drafts
     can("create", "Post");
     cannot("publish", "Post"); // publishing is done by moderator
 
     // OWNERSHIP RULES
-    can("update", "Post", { authorId: user.id });
-    can("delete", "Post", { authorId: user.id });
+    can("update", "Post", { authorId: user.id }); // can update their post
+    can("delete", "Post", { authorId: user.id }); // can delete their post
 
     can("create", "Comment");
     can("update", "Comment");
@@ -134,9 +149,9 @@ export const utils = {
   logger,
   tryCatchBlock,
   healthCheck,
-  getTime,
   genSalt,
   compareHash,
   genRefreshToken,
   defineAbility,
+  generateSlug,
 };

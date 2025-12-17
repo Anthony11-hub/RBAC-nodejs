@@ -14,7 +14,7 @@ export const registerController: RequestHandler = async (req, res, next) => {
   });
 
   if (error) {
-    throw new ValidationError("Validation failed", error.message);
+    throw new ValidationError(error.message, error.message);
   }
 
   const hashedPassword = await utils.genSalt(10, body.password);
@@ -64,7 +64,7 @@ export const loginController: RequestHandler = async (req, res, next) => {
 
   // authenticate user
   const user = await prisma.user.findUnique({
-    where: { email: body.email },
+    where: { email: value.email },
   });
 
   if (!user) {
@@ -76,7 +76,7 @@ export const loginController: RequestHandler = async (req, res, next) => {
   }
 
   // password check
-  if (!(await utils.compareHash(body.passowrd, user.password))) {
+  if (!(await utils.compareHash(user.password, value.password))) {
     throw new AppError(
       "Wrong password.", // User-facing message
       "Password does not match stored hash.", // Internal message
@@ -87,14 +87,8 @@ export const loginController: RequestHandler = async (req, res, next) => {
   // generate refresh token
   const refreshToken = utils.genRefreshToken(user.id, user.role);
 
-  // send token to cookie
-  res.cookie("jwt", refreshToken, {
-    expires: new Date(Date.now() + 60 * 60 * 1000 * 24),
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "prod",
-  });
-
   res.status(200).json({
     message: "Logged in successfully",
+    token: refreshToken, // for testing on postman
   });
 };
